@@ -3,16 +3,19 @@
     "tasks": [
         {
             "type": "shell",
+            "label": "Build",
+            "command": "make clean && make",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "type": "shell",
             "label": "Start LinkServer",
             "command": "${LINKSERVER_PATH}/LinkServer gdbserver --keep-alive LPC4337",
             "options": {
                 "cwd": "${workspaceFolder}"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "isBackground": false
+            }
         }
     ]
 }
