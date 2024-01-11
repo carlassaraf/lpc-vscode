@@ -2,18 +2,18 @@
     "configurations": [
         {
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/out/lpc4337_m4/firmware.axf",
+            "executable": "out/lpc4337_m4/firmware.axf",
             "name": "Debug with OpenOCD",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
             "configFiles": [
-                "${workspaceRoot}/etc/openocd/lpc4337.cfg"
+                "etc/openocd/lpc4337.cfg"
             ],
             "searchDir": [],
             "runToEntryPoint": "main",
             "showDevDebugOutput": "none",
-            "svdFile": "${workspaceRoot}/svd/lpc43xx.svd",
+            "svdFile": "svd/lpc43xx.svd",
         }
     ]
 }
