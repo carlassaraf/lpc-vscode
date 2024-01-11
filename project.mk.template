@@ -44,12 +44,10 @@ PROJECT = examples/blinky
 # current target
 TARGET = lpc4337_m4
 #TARGET = lpc4337_m0
-#TARGET = lpc1769
 
 # current board (optional)
 BOARD = edu_ciaa_nxp
 #BOARD = ciaa_nxp
-#BOARD = lpcxpresso1769
 
 # Object file for multicore applications (only needed by lpc54102_m4 target if
 # you need to add an lpc54102_m0 program). For example:
