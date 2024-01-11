@@ -1,6 +1,20 @@
 {
     "configurations": [
         {
+            "name": "MCU-Link M4",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbTarget": "localhost:3333",
+            "cwd": "${workspaceFolder}",
+            "executable": "out/lpc4337_m4/firmware.axf",
+            "postLaunchCommands": [
+                "monitor semihosting enable"
+            ],
+            "runToEntryPoint": "main",
+            "svdFile": "svd/lpc43xx.svd",
+        },
+        {
             "cwd": "${workspaceRoot}",
             "executable": "out/lpc4337_m4/firmware.axf",
             "name": "Debug with OpenOCD",
