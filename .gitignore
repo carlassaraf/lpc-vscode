@@ -1,9 +1,2 @@
-*.launch
-.project
-.cproject
 project.mk
-tags
-.settings
-*anjuta*
-*kdev4*
-.vscode
+.DS_Store
