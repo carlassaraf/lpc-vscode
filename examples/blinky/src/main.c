@@ -31,75 +31,25 @@
  *
  */
  
-/** @brief This is a simple blink example.
- */
+// File inclusions
 
-/** \addtogroup blink Bare-metal blink example
- ** @{ */
+#include "ciaa_gpio_api.h"
+#include "ciaa_stdlib.h"
 
-/*==================[inclusions]=============================================*/
-
-#include "main.h"
-#include "board.h"
-
-/*==================[macros and definitions]=================================*/
-
-/*==================[internal data declaration]==============================*/
-
-/*==================[internal functions declaration]=========================*/
-
-/** @brief hardware initialization function
- *	@return none
- */
-static void initHardware(void);
-
-/** @brief delay function
- * @param t desired milliseconds to wait
- */
-static void pausems(uint32_t t);
-
-/*==================[internal data definition]===============================*/
-
-/** @brief used for delay counter */
-static uint32_t pausems_count;
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-static void initHardware(void)
-{
-	Board_Init();
+/**
+ * @brief Main program
+*/
+int main(void) {
+	// Update system clock
 	SystemCoreClockUpdate();
-	SysTick_Config(SystemCoreClock / 1000);
-}
+    // Set LED1 GPIO as output
+	gpio_set_dir(LED1, true);
 
-static void pausems(uint32_t t)
-{
-	pausems_count = t;
-	while (pausems_count != 0) {
-		__WFI();
+	while(1) {
+        // Toggle LED1
+		gpio_xor(LED1);
+        // Wait for 1 second
+		sleep_ms(1000);
 	}
+	return 0;
 }
-
-/*==================[external functions definition]==========================*/
-
-void SysTick_Handler(void)
-{
-	if(pausems_count > 0) pausems_count--;
-}
-
-int main(void)
-{
-	initHardware();
-
-	while (1)
-	{
-		Board_LED_Toggle(LED);
-		pausems(DELAY_MS);
-	}
-}
-
-/** @} doxygen end group definition */
-
-/*==================[end of file]============================================*/
