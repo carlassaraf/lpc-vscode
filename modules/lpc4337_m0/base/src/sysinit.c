@@ -29,11 +29,11 @@
  * this code.
  */
 
- #if defined(NO_BOARD_LIB)
- #include "chip.h"
- #else
- #include "board.h"
- #endif
+#if defined(NO_BOARD_LIB)
+#include "chip.h"
+#else
+#include "board.h"
+#endif
 
 /*****************************************************************************
  * Private types/enumerations/variables
