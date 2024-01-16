@@ -31,86 +31,79 @@
  *
  */
 
-/** @brief Multicore blink example for LPC54102 (M4 core)
- */
+#include "ciaa_gpio_api.h"
+#include "ciaa_systick_api.h"
+#include "ciaa_stdlib.h"
+#include "ciaa_multicore_api.h"
 
-/*==================[inclusions]=============================================*/
+// Counts the number of Systick interrupts
+uint8_t systick_cnt = 0;
+// Counts the number of M0 Core interrupts
+uint8_t m0_cnt = 0;
 
-#include "main.h"
-#include "board.h"
+/**
+ * @brief M0 core interrupt callback
+*/
+void m0app_callback(void) {
+	// Toggle LED every 2 M0 to M4 interrupts
+	if(m0_cnt++ == 1) {
+		// Toggle LED3
+		gpio_xor(LED3);
+		// Reset counter
+		m0_cnt = 0;
+	}
+}
 
-/*==================[macros and definitions]=================================*/
+/**
+ * @brief Systick interrupt callback
+*/
+void systick_callback(void) {
+	// Interrupt M0 at 500 ms
+	if(systick_cnt++ == 9) {
+		// Interrupt M0 core
+		multicore_interrupt_m0_core();
+		// Reset counter
+		systick_cnt = 0;
+	}
+}
 
-/** M0 core image defined in linker script */
-extern uint32_t __core_m0slave_START__[];
-
-/** M0 image, stack pointer initial value */
-#define M0_STACK __core_m0slave_START__[0]
-
-/** M0 image, reset routine entry point */
-#define M0_ENTRY __core_m0slave_START__[1]
-
-/*==================[internal data declaration]==============================*/
-
-/*==================[internal functions declaration]=========================*/
-
-/** @brief hardware initialization function
- *	@return none
- */
-static void initHardware(void);
-
-/** @brief delay function
- * @param t desired milliseconds to wait
- */
-static void pausems(uint32_t t);
-
-/*==================[internal data definition]===============================*/
-
-/** @brief used for delay counter */
-static uint32_t pausems_count;
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-static void initHardware(void)
-{
+/**
+ * @brief Main program
+*/
+int main(void) {
+	// Update system clock
 	SystemCoreClockUpdate();
-	Board_Init();
-	SysTick_Config(SystemCoreClock / 1000);
-}
+	// Set LED1 and LED3 as output
+	gpio_set_dir_out(LED1);
+	gpio_set_dir_out(LED3);
+	// Enable interrupt from M0 core
+	multicore_m0app_irq_set_enabled(true);
+	// Start M0 core
+	multicore_m0_start();
+	// Clear LED1 and LED3
+	gpio_clr(LED1);
+	gpio_clr(LED3);
+	// Initialize Systick with 1 ms
+	systick_init(50000);
+	// Add Systick callback
+	systick_set_irq_handler(systick_callback);
 
-static void pausems(uint32_t t)
-{
-	pausems_count = t;
-	while (pausems_count != 0) {
-		__WFI();
+	while (1) {
+		// Wait for 1 second
+		sleep_ms(2000);
+		// Toggle LED1
+		gpio_xor(LED1);
 	}
+	return 0;
 }
 
-/*==================[external functions definition]==========================*/
-
-void SysTick_Handler(void)
-{
-	if(pausems_count > 0) pausems_count--;
+/**
+ * @brief M0APP interrupt handler
+ * @note Produces the same effect as using macro: m0app_handler(m0app_callback);
+*/
+void M0APP_IRQHandler(void) {
+	// Clear interrupt
+	multicore_irq_clear();
+	// Call callback
+	m0app_callback();
 }
-
-int main(void)
-{
-	initHardware();
-
-	/* Boot M0 core, using reset vector and stack pointer from the CM0+
-	   image in FLASH. */
-	Chip_CPU_CM0Boot((uint32_t *)M0_ENTRY, (uint32_t *)M0_STACK);
-
-	while (1)
-	{
-		DEBUGSTR("hello world!\r\n");
-		Board_LED_Toggle(LED);
-		pausems(DELAY_MS);
-	}
-}
-
-/** @} doxygen end group definition */
-
-/*==================[end of file]============================================*/
