@@ -31,70 +31,54 @@
  *
  */
 
-/** @brief blink Multicore blink example for LPC54102 (M0 core)
- *
- */
+#include "ciaa_multicore_api.h"
+#include "ciaa_gpio_api.h"
 
-/*==================[inclusions]=============================================*/
+/**
+ * @brief Interrupt callback
+*/
+void m4_callback(void) {
+	// Toggle LED2
+	gpio_xor(LED2);
+    // Interrupt M4 core
+	multicore_interrupt_m4_core();
+}
 
-#include "main.h"
-#include "board.h"
-
-/*==================[macros and definitions]=================================*/
-
-/*==================[internal data declaration]==============================*/
-
-/*==================[internal functions declaration]=========================*/
-
-/** @brief hardware initialization function
- *	@return none
- */
-static void initHardware(void);
-
-/** @brief delay function
- * @param t desired milliseconds to wait
- */
-static void pausems(uint32_t t);
-
-/*==================[internal data definition]===============================*/
-
-/** @brief used for delay counter */
-static uint32_t pausems_count;
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-static void initHardware(void)
-{
+/**
+ * @brief Main program
+*/
+int main(void) {
+    // Initialize system
+    SystemInit();
+    // Update system clock
 	SystemCoreClockUpdate();
-	SysTick_Config(SystemCoreClock / 1000);
+    // LED2 as output
+	gpio_set_dir_out(LED2);
+    // RGB LED as output
+	gpio_set_dir_out(LEDR);
+	gpio_set_dir_out(LEDG);
+	gpio_set_dir_out(LEDB);
+    // Enable IRQ from M4 core
+	multicore_m4_irq_set_enabled(true);
+    // Clear LED2
+	gpio_clr(LED2);
+    // Clear RGB LED
+	gpio_clr(LEDR);
+	gpio_clr(LEDG);
+	gpio_clr(LEDB);
+
+	while (1);
+
+	return 0;
 }
 
-static void pausems(uint32_t t)
-{
-	pausems_count = t;
-	while (pausems_count != 0) {
-		__WFI();
-	}
+/**
+ * @brief M4 Interrupt Handler
+ * @note Produces the same effect as using macro: m4_handler(m4_callback)
+*/
+void M4_IRQHandler(void) {
+    // Clear interrupt
+	multicore_irq_clear();
+    // Call function callback
+	m4_callback();
 }
-
-/*==================[external functions definition]==========================*/
-
-void SysTick_Handler(void)
-{
-	if(pausems_count > 0) pausems_count--;
-}
-
-int main(void)
-{
-	initHardware();
-
-	while (1)
-	{
-		Board_LED_Toggle(LED);
-		pausems(DELAY_MS);
-	}
-}
-
-/*==================[end of file]============================================*/
